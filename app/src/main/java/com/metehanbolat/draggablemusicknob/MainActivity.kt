@@ -1,16 +1,21 @@
 package com.metehanbolat.draggablemusicknob
 
 import android.os.Bundle
+import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -30,6 +35,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@ExperimentalComposeUiApi
 @Composable
 fun MusicKnob(
     modifier: Modifier = Modifier,
@@ -66,6 +72,26 @@ fun MusicKnob(
                 touchX = event.x
                 touchY = event.y
                 val angle = -atan2(centerX - touchX, centerY - touchY) * (180f / PI).toFloat()
+
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN,
+                    MotionEvent.ACTION_MOVE -> {
+                        if (angle !in -limitingAngle..limitingAngle) {
+                            val fixedAngle = if (angle in -180f..-limitingAngle) {
+                                360f + angle
+                            } else {
+                                angle
+                            }
+                            rotation = fixedAngle
+
+                            val percent = (fixedAngle - limitingAngle) / (360f - 2 * limitingAngle)
+                            onValueChange(percent)
+                            true
+                        } else false
+                    }
+                    else -> false
+                }
             }
+            .rotate(rotation)
     )
 }
