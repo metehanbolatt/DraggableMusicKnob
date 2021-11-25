@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Color(0xFF101010))
+                        .padding(10.dp)
                 ){
                     Row(
                         horizontalArrangement = Arrangement.Center,
