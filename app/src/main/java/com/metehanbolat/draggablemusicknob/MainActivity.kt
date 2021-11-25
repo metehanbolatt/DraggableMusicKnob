@@ -4,9 +4,10 @@ import android.os.Bundle
 import android.view.MotionEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,20 +17,82 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import com.metehanbolat.draggablemusicknob.ui.theme.DraggableMusicKnobTheme
 import kotlin.math.PI
 import kotlin.math.atan2
+import kotlin.math.roundToInt
 
+@ExperimentalComposeUiApi
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             DraggableMusicKnobTheme {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF101010))
+                ){
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        var volume by remember {
+                            mutableStateOf(0f)
+                        }
+                        val barCount = 20
+                        MusicKnob(
+                            modifier = Modifier.size(100.dp)
+                        ){
+                            volume = it
+                        }
+                        Spacer(modifier = Modifier.width(20.dp))
+                        VolumeBar(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(30.dp),
+                            activeBars = (barCount * volume).roundToInt(),
+                            barCount = barCount
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
+@Composable
+fun VolumeBar(
+    modifier: Modifier = Modifier,
+    activeBars: Int = 0,
+    barCount: Int = 10
+) {
+    BoxWithConstraints(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+    ) {
+        val barWidth = remember {
+            constraints.maxWidth / (2f * barCount)
+        }
+        Canvas(modifier = modifier){
+            for (i in 0 until barCount){
+                drawRoundRect(
+                    color = if (i in 0..activeBars) Color.Green else Color.DarkGray,
+                    topLeft = Offset(i * barWidth * 2f + barWidth / 2f, 0f),
+                    size = Size(barWidth, constraints.maxHeight.toFloat()),
+                    cornerRadius = CornerRadius(0f)
+                )
             }
         }
     }
